@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Failure</title>
+</head>
+<body>
+    <h1 th:text="'Failure! preference_id=' + ${preference_id}"></h1>
+    <p th:text="'Payment was not payed with status: ' + ${payment.status} + ' (' + ${payment.statusDetail} + ')'"></p>
+    <p>Items:</p>
+    <li th:each="item: ${items}" th:text="${item.title}"></li>
+</body>
+</html>
