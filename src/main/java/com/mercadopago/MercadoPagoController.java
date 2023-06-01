@@ -12,17 +12,17 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
-@CrossOrigin(origins = "**")
+@CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/meli")
+@RequestMapping("/mercadopago")
 public class MercadoPagoController {
 
     @PostMapping("/createAndRedirect")
     public String createAndRecirect(HttpServletRequest req, @RequestBody ItemDto itemDto) throws MPException {
 
-        String FailureUrl = URLLocation.getBaseUrl(req) + "meli/mercadopago/payment/failure";
-        String PendingUrl = URLLocation.getBaseUrl(req) + "meli/mercadopago/payment/pending";
-        String SuccessUrl = URLLocation.getBaseUrl(req) + "meli/mercadopago/payment/success";
+        String FailureUrl = URLLocation.getBaseUrl(req) + "/mercadopago/failure";
+        String PendingUrl = URLLocation.getBaseUrl(req) + "/mercadopago/pending";
+        String SuccessUrl = URLLocation.getBaseUrl(req) + "/mercadopago/success";
 
         Preference preference = new Preference();
 
