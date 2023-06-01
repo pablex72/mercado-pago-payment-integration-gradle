@@ -2,11 +2,11 @@ package com.mercadopago;
 import com.google.gson.GsonBuilder;
 import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.MerchantOrder;
-import com.mercadopago.resources.Payment;
 import com.mercadopago.resources.Preference;
 import com.mercadopago.resources.datastructures.preference.BackUrls;
 import com.mercadopago.resources.datastructures.preference.Item;
 
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,8 +28,8 @@ public class MercadoPagoController {
 
         preference.setBackUrls(
                 new BackUrls().setFailure(FailureUrl)
-           .setPending(PendingUrl)
-           .setSuccess(SuccessUrl)
+                        .setPending(PendingUrl)
+                        .setSuccess(SuccessUrl)
         );
 
         Item item = new Item();
@@ -46,7 +46,8 @@ public class MercadoPagoController {
     }
 
     @GetMapping("/success")
-    public String success(@RequestParam("collection_id") String collectionId,
+    public String success(HttpServletRequest request,
+                          @RequestParam("collection_id") String collectionId,
                           Model model
     ) throws MPException {
         var payment = com.mercadopago.resources.Payment.findById(collectionId);
@@ -58,21 +59,28 @@ public class MercadoPagoController {
     }
 
     @GetMapping("/failure")
-    public String failure(@RequestParam("collection_id") String collectionId,
+    public String failure(HttpServletRequest request,
+                          @RequestParam("collection_id") String collectionId,
                           @RequestParam("merchant_order_id") String merchantOrderId,
                           @RequestParam("preference_id") String preferenceId,
                           Model model
-                          ) throws MPException {
+    ) throws MPException {
+        model.addAttribute("preference_id", preferenceId);
 
-            Preference preference = Preference.findById(preferenceId);
-            MerchantOrder order = MerchantOrder.findById(merchantOrderId);
-            Payment payment = Payment.findById(collectionId);
+        var preference = Preference.findById(preferenceId);
+        var order = MerchantOrder.findById(merchantOrderId);
+        var payment = com.mercadopago.resources.Payment.findById(collectionId);
 
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(order));
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(payment));
+
+        model.addAttribute("items", preference.getItems());
+        model.addAttribute("payment", payment);
         return "failure";
     }
 
     @GetMapping("/pending")
-    public String pending() throws MPException {
+    public String pending(HttpServletRequest request) throws MPException {
         return "pending";
     }
 }
