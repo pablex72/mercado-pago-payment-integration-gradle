@@ -8,7 +8,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class ItemDto {
+public class MpPaymentDto {
 
     private String title;
     private Integer quantity;

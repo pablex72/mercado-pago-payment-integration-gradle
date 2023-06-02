@@ -1,13 +1,18 @@
 package com.mercadopago;
+
 import com.google.gson.GsonBuilder;
 import com.mercadopago.exceptions.MPException;
-import com.mercadopago.resources.MerchantOrder;
+
+import com.mercadopago.resources.Payment;
 import com.mercadopago.resources.Preference;
+import com.mercadopago.resources.datastructures.preference.Address;
 import com.mercadopago.resources.datastructures.preference.BackUrls;
 import com.mercadopago.resources.datastructures.preference.Item;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import com.mercadopago.resources.datastructures.preference.Phone;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,8 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/mercadopago")
 public class MercadoPagoController {
 
-    @PostMapping("/createAndRedirect")
-    public String createAndRecirect(HttpServletRequest req, @RequestBody ItemDto itemDto) throws MPException {
+    @GetMapping("/pay")
+    public String createAndRecirect(HttpServletRequest req) throws MPException {
 
         String FailureUrl = URLLocation.getBaseUrl(req) + "/mercadopago/failure";
         String PendingUrl = URLLocation.getBaseUrl(req) + "/mercadopago/pending";
@@ -33,10 +38,10 @@ public class MercadoPagoController {
         );
 
         Item item = new Item();
-        item.setTitle(itemDto.getTitle())
-                .setQuantity(itemDto.getQuantity())
-                .setUnitPrice(itemDto.getPrice());
-
+        item.setTitle("Radio Sony");
+        item.setQuantity(2);
+        item.setUnitPrice(55.0f);
+        item.setCurrencyId("ARS");
         preference.appendItem(item);
 
         Preference result = preference.save();
@@ -46,41 +51,60 @@ public class MercadoPagoController {
     }
 
     @GetMapping("/success")
-    public String success(HttpServletRequest request,
-                          @RequestParam("collection_id") String collectionId,
-                          Model model
-    ) throws MPException {
-        var payment = com.mercadopago.resources.Payment.findById(collectionId);
+    public ResponseEntity<String> success(@RequestParam("collection_id") String collectionId) throws MPException {
 
+        Payment payment = Payment.findById(collectionId);
+
+        String response = "Payment ID: " + payment.getId() +
+                ", Date Created: " + payment.getDateCreated() +
+                ", Status: " + payment.getStatus() +
+                ", Status Detail: " + payment.getStatusDetail() +
+                ", PaymentMethod: " + payment.getPaymentMethodId() +
+                ", TotalPaid: " + payment.getTransactionAmount() +
+                ", Currency: " + payment.getCurrencyId() ;
+
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(response));
         System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(payment));
 
-        model.addAttribute("payment", payment);
-        return "ok";
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @GetMapping("/failure")
-    public String failure(HttpServletRequest request,
-                          @RequestParam("collection_id") String collectionId,
-                          @RequestParam("merchant_order_id") String merchantOrderId,
-                          @RequestParam("preference_id") String preferenceId,
-                          Model model
-    ) throws MPException {
-        model.addAttribute("preference_id", preferenceId);
+    public ResponseEntity<?> failure(@RequestParam("collection_id") String collectionId) throws MPException {
 
-        var preference = Preference.findById(preferenceId);
-        var order = MerchantOrder.findById(merchantOrderId);
-        var payment = com.mercadopago.resources.Payment.findById(collectionId);
+        Payment payment = Payment.findById(collectionId);
 
-        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(order));
+        String response = "Payment ID: " + payment.getId() +
+                ", Date Created: " + payment.getDateCreated() +
+                ", Status: " + payment.getStatus() +
+                ", Status Detail: " + payment.getStatusDetail() +
+                ", PaymentMethod: " + payment.getPaymentMethodId() +
+                ", TotalPaid: " + payment.getTransactionAmount() +
+                ", Currency: " + payment.getCurrencyId() ;
+
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(response));
         System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(payment));
 
-        model.addAttribute("items", preference.getItems());
-        model.addAttribute("payment", payment);
-        return "failure";
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @GetMapping("/pending")
-    public String pending(HttpServletRequest request) throws MPException {
-        return "pending";
+    public ResponseEntity<String> pending(@RequestParam("collection_id") String collectionId) throws MPException {
+
+        Payment payment = Payment.findById(collectionId);
+
+        String response = "Payment ID: " + payment.getId() +
+                ", Date Created: " + payment.getDateCreated() +
+                ", Status: " + payment.getStatus() +
+                ", Status Detail: " + payment.getStatusDetail() +
+                ", PaymentMethod: " + payment.getPaymentMethodId() +
+                ", TotalPaid: " + payment.getTransactionAmount() +
+                ", Currency: " + payment.getCurrencyId() ;
+
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(response));
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(payment));
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
